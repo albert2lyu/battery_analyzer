@@ -60,7 +60,7 @@ wait_ins_charger()
 wait_remove_charger()
 {
 	LOG "Waiting remove charger!"
-	LOG "Before removing charger. Make sure the device is ready to sampling!"
+	LOG "Before removing charger. Make sure the device is ready to sample!"
 	is_charger
 	while [ $? -eq 1 ]
 	do
@@ -101,7 +101,7 @@ until [  $batt_full = 1 -a $charger_online = 0 -o $ready_sample = 1 ]; do
 	charger_online=$?
 done
 
-LOG "Battery is full! Start to sampling."
+LOG "Battery is full! Start to sample."
 
 start_time=`date +%s`
 filename=$result_dir/voltage_sample_`date +%Y%m%d-%H%M%S`.txt
