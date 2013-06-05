@@ -70,4 +70,4 @@ mv -f data.tmp data.csv
 rm -f $tempfile data.tmp
 
 # print out the result in C style.
-awk 'BEGIN{FS=",";OFS=",";print "{"} NR>1&&$NF!=0{print "{"$2,$NF"},"} END{print "}\n"}' data.csv
+awk 'BEGIN{FS=",";OFS=",";print "{"} NR>1&&$NF!=0{print "{"$2,$NF"},"} END{print "{0   ,0},\n}\n"}' data.csv
