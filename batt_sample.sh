@@ -102,6 +102,7 @@ until [  $batt_full = 1 -a $charger_online = 0 -o $ready_sample = 1 ]; do
 done
 
 LOG "Battery is full! Start to sample."
+sleep 15
 
 start_time=`date +%s`
 filename=$result_dir/voltage_sample_`date +%Y%m%d-%H%M%S`.txt
