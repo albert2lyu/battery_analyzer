@@ -2,7 +2,7 @@
 
 total_line=0
 total_time=0
-sample_point=10
+sample_point=20
 
 function usage() {
 	echo -e "Usage:\n$0 filename"
@@ -48,13 +48,19 @@ touch result.m
 chmod +x result.m
 
 # delete the wrong sample datas.
-awk 'BEGIN{FS=",";OFS=",";} {if(NR==1){PREV1=$1;PREV2=$2;PREV3=$3}else{if($2 <= PREV2){print PREV1,PREV2,PREV3};PREV1=$1;PREV2=$2;PREV3=$3}} END{print PREV1,PREV2,PREV3;if($3){print $1+20,3500,0}}' $tempfile > data.tmp
+while [ 1 ]; do
+awk 'BEGIN{FS=",";OFS=",";} {if(NR==1){PREV1=$1;PREV2=$2;PREV3=$3}else{if($2 <= PREV2){print PREV1,PREV2,PREV3;}else{print "bad"};PREV1=$1;PREV2=$2;PREV3=$3}} END{print PREV1,PREV2,PREV3;if($3){print $1+20,3500,0}}' $tempfile > data.tmp
+cp -f data.tmp temp.log
 mv -f data.tmp $tempfile
+grep bad $tempfile > /dev/null||break
+sed -i "/bad/d" $tempfile
+done
 
 total_line=`wc -l < $tempfile`
 center_line=$(($total_line/2))
 
 while [ 1 ]; do
+	echo $sample_point
 	line2del=$(($center_line/$sample_point))
 	echo "total_line=$total_line line2del=$line2del center_line=$center_line"
 
@@ -89,9 +95,8 @@ while [ 1 ]; do
 		awk 'BEGIN{FS=",";OFS=",";i=100;print "{"} NR!=1{printf("  {%4d,%3d},\n",$1,i--)} END{printf("  {%4d,%3d}\n}\n", 0, 0)}' data.tmp
 		break
 	fi
-	sample_point=$(($sample_point + 1))
-	echo $sample_point
 
+	sample_point=$(($sample_point + 1))
 done
 
 # clean the temperal files.
