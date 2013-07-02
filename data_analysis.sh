@@ -1,8 +1,10 @@
 #! /bin/bash
+# Author:Zhiqiang.xu
+# Date:2013.06.28
 
 total_line=0
 total_time=0
-sample_point=20
+sample_point=10
 
 function usage() {
 	echo -e "Usage:\n$0 filename"
@@ -14,7 +16,7 @@ if [ $# -eq 0 ]; then
 fi
 
 if [ "`which octave`" == "" ]; then
-	echo "Please install octave firstly. Or this script can't be used."
+	echo "Please install octave firstly. Or this script cannot run."
 	exit 1
 fi
 
@@ -49,11 +51,11 @@ chmod +x result.m
 
 # delete the wrong sample datas.
 while [ 1 ]; do
-awk 'BEGIN{FS=",";OFS=",";} {if(NR==1){PREV1=$1;PREV2=$2;PREV3=$3}else{if($2 <= PREV2){print PREV1,PREV2,PREV3;}else{print "bad"};PREV1=$1;PREV2=$2;PREV3=$3}} END{print PREV1,PREV2,PREV3;if($3){print $1+20,3500,0}}' $tempfile > data.tmp
-cp -f data.tmp temp.log
-mv -f data.tmp $tempfile
-grep bad $tempfile > /dev/null||break
-sed -i "/bad/d" $tempfile
+    awk 'BEGIN{FS=",";OFS=",";} {if(NR==1){PREV1=$1;PREV2=$2;PREV3=$3}else{if($2 <= PREV2){print PREV1,PREV2,PREV3;}else{print "bad"};PREV1=$1;PREV2=$2;PREV3=$3}} END{print PREV1,PREV2,PREV3;if($3){print $1+20,3500,0}}' $tempfile > data.tmp
+    cp -f data.tmp temp.log
+    mv -f data.tmp $tempfile
+    grep bad $tempfile > /dev/null||break
+    sed -i "/bad/d" $tempfile
 done
 
 total_line=`wc -l < $tempfile`
@@ -83,8 +85,6 @@ while [ 1 ]; do
 	awk 'BEGIN{FS=",";print "x2=["} {printf("%d,", $1)}END{print "];"}' data_bottomhalf.tmp >> result.m
 	awk 'BEGIN{FS=",";print "y2=["} {printf("%d,", $2)}END{print "];"}' data_bottomhalf.tmp >> result.m
 	echo "res2=spline(x2,y2,xx2);" >> result.m
-	echo "plot(x,y,xx1,res1,xx2,res2);" >> result.m
-
 	echo 'printf ("%d\n", res1);' >> result.m
 	echo 'printf ("%d\n", res2);' >> result.m
 # print out the result in C style.
@@ -92,12 +92,20 @@ while [ 1 ]; do
 	checkData data.tmp
 
 	if [ $? == 0 -o $sample_point -ge 100 ]; then
-		awk 'BEGIN{FS=",";OFS=",";i=100;print "{"} NR!=1{printf("  {%4d,%3d},\n",$1,i--)} END{printf("  {%4d,%3d}\n}\n", 0, 0)}' data.tmp
 		break
 	fi
 
 	sample_point=$(($sample_point + 1))
 done
 
+awk 'BEGIN{FS=",";OFS=",";i=100;print "{"} NR!=1{printf("  {%4d,%3d},\n",$1,i--)} END{printf("  {%4d,%3d}\n}\n", 0, 0)}' data.tmp
+if [ $sample_point -ge 100 ]; then echo "The result is not reliable. Something may be wrong. Please check the data and try again.";fi
+
+# Draw the sample data and the result.
+echo "plot(x,y,xx1,res1,xx2,res2);" >> result.m
+echo "pause;" >> result.m
+./result.m > /dev/null
+
 # clean the temperal files.
-rm -f $tempfile *.tmp
+rm -f $tempfile *.tmp result.m
+
